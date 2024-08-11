@@ -1,6 +1,6 @@
 workflows:
   ios-workflow:
-    name: iOS Workflow
+    name: Libras Tradutor
     environment:
       xcode: latest
     scripts:
