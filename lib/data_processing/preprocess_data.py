@@ -1,5 +1,6 @@
-import cv2
 import os
+import cv2
+
 
 def preprocess_data(video_path, output_dir, frame_size=(224, 224)):
     cap = cv2.VideoCapture(video_path)
@@ -7,6 +8,7 @@ def preprocess_data(video_path, output_dir, frame_size=(224, 224)):
 
     while cap.isOpened():
         ret, frame = cap.read()
+        cv2.imshow('frame', frame)
         if not ret:
             break
 
