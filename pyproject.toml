@@ -2,5 +2,5 @@
 ignore = ["TYP001"]  # Ignora avisos sobre stubs de tipo ausentes
 
 # Outras configurações do Ruff podem ser adicionadas aqui
-line-length = 88
+line-length = 92
 select = ["E", "F", "W", "C90"]
