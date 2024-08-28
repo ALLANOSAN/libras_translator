@@ -1,6 +1,7 @@
-import tensorflow as tf
-from tensorflow.python.keras import layers, models
 import os
+import tensorflow as tf
+from keras import layers, models
+
 
 # Defina o caminho para os dados de treinamento e validação
 train_dir = 'path_to_training_data'
