@@ -1,12 +1,13 @@
 import tensorflow as tf
-import keras
+from tensorflow import keras
+from tensorflow.lite import TFLiteConverter
 
 # Carregar o modelo treinado
-model = keras.models.load_model('libras_model.h5')
+model: keras.Model = keras.models.load_model('libras_model.h5')
 
 # Converter o modelo para TFLite
-converter = tf.lite.TFLiteConverter.from_keras_model(model)
-tflite_model = converter.convert()
+converter: TFLiteConverter = tf.lite.TFLiteConverter.from_keras_model(model)
+tflite_model: bytes = converter.convert()
 
 # Salvar o modelo TFLite
 with open('libras_model.tflite', 'wb') as f:

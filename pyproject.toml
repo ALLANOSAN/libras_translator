@@ -1,0 +1,6 @@
+[tool.ruff]
+ignore = ["TYP001"]  # Ignora avisos sobre stubs de tipo ausentes
+
+# Outras configurações do Ruff podem ser adicionadas aqui
+line-length = 88
+select = ["E", "F", "W", "C90"]

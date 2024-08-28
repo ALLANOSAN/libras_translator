@@ -17,7 +17,8 @@ def preprocess_image(image, label):
 # Função para carregar o dataset
 def load_dataset(directory):
     dataset = tf.data.Dataset.list_files(directory + '/*/*')
-    dataset = dataset.map(lambda x: (tf.io.read_file(x), tf.strings.split(x, os.sep)[-2]))
+    dataset = dataset.map(lambda x: (tf.io.read_file(x),
+                                     tf.strings.split(x, os.sep)[-2]))
     dataset = dataset.map(preprocess_image)
     return dataset
 
@@ -26,8 +27,10 @@ train_dataset = load_dataset(train_dir)
 validation_dataset = load_dataset(validation_dir)
 
 # Agrupar e embaralhar os datasets
-train_dataset = train_dataset.shuffle(buffer_size=1000).batch(32).prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
-validation_dataset = validation_dataset.batch(32).prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
+train_dataset = train_dataset.shuffle(buffer_size=1000).batch(32).prefetch(buffer_size=
+                                                                           tf.data.experimental.AUTOTUNE)
+validation_dataset = validation_dataset.batch(32).prefetch(buffer_size=
+                                                           tf.data.experimental.AUTOTUNE)
 
 # Crie o modelo
 model = models.Sequential([
