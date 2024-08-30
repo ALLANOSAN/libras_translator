@@ -47,8 +47,8 @@ def main():
     e chama a função de pré-processamento.
     """
     # Defina o caminho para o seu vídeo e o diretório de saída
-    video_path = 'path_to_your_video.mp4'
-    output_dir = 'output_frames'
+    video_path = 'C:\\Wondershare UniConverter 15\Downloaded\libras.mp4'
+    output_dir = 'C:\\Wondershare UniConverter 15\Downloaded'
     os.makedirs(output_dir, exist_ok=True)
     preprocess_data(video_path, output_dir)
 

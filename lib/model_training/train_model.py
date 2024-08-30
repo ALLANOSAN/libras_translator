@@ -1,13 +1,11 @@
-import os
 import tensorflow as tf
-from keras import layers, models
+from tensorflow.keras import layers
+import os
 
+# Diretórios de treinamento e validação
+train_dir = 'C:/Wondershare UniConverter 15/Downloaded'
+validation_dir = 'C:/Wondershare UniConverter 15/Downloaded'
 
-# Defina o caminho para os dados de treinamento e validação
-train_dir = 'path_to_training_data'
-validation_dir = 'path_to_validation_data'
-
-# Função para carregar e preprocessar imagens
 def preprocess_image(image, label):
     image = tf.image.decode_jpeg(image, channels=3)
     image = tf.image.resize(image, [224, 224])
@@ -26,17 +24,23 @@ def load_dataset(directory):
 train_dataset = load_dataset(train_dir)
 validation_dataset = load_dataset(validation_dir)
 
-# Agrupar e embaralhar os datasets
-train_dataset = train_dataset.shuffle(buffer_size=1000).batch(32).prefetch(buffer_size=
-                                                                           tf.data.experimental.AUTOTUNE)
-validation_dataset = validation_dataset.batch(32).prefetch(buffer_size=
-                                                           tf.data.experimental.AUTOTUNE)
+# Codificar os rótulos
+def encode_labels(image, label):
+    label = tf.strings.to_number(label, out_type=tf.int32)
+    label = tf.one_hot(label, depth=10)  # Supondo 10 classes
+    return image, label
 
-# Crie o modelo
-model = models.Sequential([
-    layers.Conv2D(32, (3, 3), activation='relu', input_shape=(224, 224, 3)),
-    layers.MaxPooling2D((2, 2)),
-    layers.Conv2D(64, (3, 3), activation='relu'),
+train_dataset = train_dataset.map(encode_labels)
+validation_dataset = validation_dataset.map(encode_labels)
+
+# Agrupar e embaralhar os datasets
+train_dataset = train_dataset.shuffle(buffer_size=1000).batch(32)
+validation_dataset = validation_dataset.batch(32)
+
+# Definir o modelo
+model = tf.keras.Sequential([
+    layers.Input(shape=(224, 224, 3)),
+    layers.Conv2D(32, (3, 3), activation='relu'),
     layers.MaxPooling2D((2, 2)),
     layers.Conv2D(128, (3, 3), activation='relu'),
     layers.MaxPooling2D((2, 2)),
@@ -51,7 +55,8 @@ model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accur
 history = model.fit(
     train_dataset,
     epochs=10,
-    validation_data=validation_dataset)
+    validation_data=validation_dataset
+)
 
 # Salve o modelo
 model.save('libras_model.h5')
