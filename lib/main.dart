@@ -1,28 +1,30 @@
+import 'package:logger/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:tflite_flutter/tflite_flutter.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:image/image.dart' as img;
 import 'dart:math' as math;
-import 'dart:typed_data'; // Importando o pacote dart:typed_data
+import 'dart:typed_data';
 
 void main() => runApp(const LibrasTranslatorApp());
+final logger = Logger();
 
-class LibrasTranslatorApp extends StatelessWidget {
-  const LibrasTranslatorApp({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'LIBRAS Translator',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: const MyHomePage(),
-    );
-  }
+class LibrasTranslatorApp extends StatelessWidget {const LibrasTranslatorApp({super.key});
+
+@override
+Widget build(BuildContext context) {
+  return MaterialApp(
+    title: 'LIBRAS Translator',
+    theme: ThemeData(
+      primarySwatch: Colors.blue,),
+    home: const MyHomePage(),
+  );
+}
 }
 
 class MyHomePage extends StatefulWidget {
@@ -61,9 +63,13 @@ class MyHomePageState extends State<MyHomePage> {
   }
 
   Future<List<String>> loadLabels(String path) async {
-    final file = File(path);
-    final lines = await file.readAsLines();
-    return lines;
+    try {
+      final file = await rootBundle.loadString(path);
+      return file.split('\n');
+    } catch (e) {
+      logger.e('Erro ao carregar as labels:', e);
+      return [];
+    }
   }
 
   Future<void> startRecording() async {
@@ -95,6 +101,7 @@ class MyHomePageState extends State<MyHomePage> {
     }
 
     List<String> predictions = [];
+    int maxIndex; // Declaração da variável maxIndex
 
     // Processar frames em intervalos regulares
     for (int i = 0; i < videoImage.height; i += 30) {
@@ -109,7 +116,8 @@ class MyHomePageState extends State<MyHomePage> {
       interpreter!.run(input, output);
 
       // Encontrar o índice com maior valor
-      int maxIndex = output[0].indexWhere((element) => element == output[0].reduce(math.max));
+      maxIndex = output[0].indexWhere((element) =>
+        element == output[0].reduce(math.max));
       predictions.add(labels![maxIndex]);
     }
 
@@ -117,6 +125,7 @@ class MyHomePageState extends State<MyHomePage> {
     return predictions.join('');
   }
 
+  // Função modificada para usar getUint8List()
   Uint8List imgToByteListFloat32(img.Image image, int inputSize) {
     var convertedBytes = Float32List(1 * inputSize * inputSize * 3);
     var buffer = Float32List.view(convertedBytes.buffer);
@@ -159,11 +168,10 @@ class MyHomePageState extends State<MyHomePage> {
             onPressed: stopRecording,
             child: const Text('Stop Recording'),
           ),
-          if (recognizedText != null)
-            Text(
-              recognizedText!,
-              style: const TextStyle(fontSize: 20),
-            ),
+          if (recognizedText != null)Text(
+            recognizedText!,
+            style: const TextStyle(fontSize: 20),
+          ),
         ],
       ),
     );
@@ -174,5 +182,4 @@ class MyHomePageState extends State<MyHomePage> {
     controller?.dispose();
     interpreter?.close();
     super.dispose();
-  }
-}
+  }}
