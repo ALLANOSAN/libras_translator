@@ -13,18 +13,19 @@ import 'dart:typed_data';
 void main() => runApp(const LibrasTranslatorApp());
 final logger = Logger();
 
+class LibrasTranslatorApp extends StatelessWidget {
+  const LibrasTranslatorApp({super.key});
 
-class LibrasTranslatorApp extends StatelessWidget {const LibrasTranslatorApp({super.key});
-
-@override
-Widget build(BuildContext context) {
-  return MaterialApp(
-    title: 'LIBRAS Translator',
-    theme: ThemeData(
-      primarySwatch: Colors.blue,),
-    home: const MyHomePage(),
-  );
-}
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'LIBRAS Translator',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: const MyHomePage(),
+    );
+  }
 }
 
 class MyHomePage extends StatefulWidget {
@@ -101,7 +102,7 @@ class MyHomePageState extends State<MyHomePage> {
     }
 
     List<String> predictions = [];
-    int maxIndex; // Declaração da variável maxIndex
+    int maxIndex;
 
     // Processar frames em intervalos regulares
     for (int i = 0; i < videoImage.height; i += 30) {
@@ -125,7 +126,6 @@ class MyHomePageState extends State<MyHomePage> {
     return predictions.join('');
   }
 
-  // Função modificada para usar getUint8List()
   Uint8List imgToByteListFloat32(img.Image image, int inputSize) {
     var convertedBytes = Float32List(1 * inputSize * inputSize * 3);
     var buffer = Float32List.view(convertedBytes.buffer);
@@ -168,10 +168,11 @@ class MyHomePageState extends State<MyHomePage> {
             onPressed: stopRecording,
             child: const Text('Stop Recording'),
           ),
-          if (recognizedText != null)Text(
-            recognizedText!,
-            style: const TextStyle(fontSize: 20),
-          ),
+          if (recognizedText != null)
+            Text(
+              recognizedText!,
+              style: const TextStyle(fontSize: 20),
+            ),
         ],
       ),
     );
@@ -182,4 +183,5 @@ class MyHomePageState extends State<MyHomePage> {
     controller?.dispose();
     interpreter?.close();
     super.dispose();
-  }}
+  }
+}
