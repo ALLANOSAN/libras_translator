@@ -68,7 +68,7 @@ class MyHomePageState extends State<MyHomePage> {
       final file = await rootBundle.loadString(path);
       return file.split('\n');
     } catch (e) {
-      logger.e('Erro ao carregar as labels:', e);
+      logger.e('Erro ao carregar as labels: $e');
       return [];
     }
   }
