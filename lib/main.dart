@@ -106,7 +106,7 @@ class MyHomePageState extends State<MyHomePage> {
 
     // Processar frames em intervalos regulares
     for (int i = 0; i < videoImage.height; i += 30) {
-      final frame = img.copyCrop(videoImage, 0, i, videoImage.width, 30);
+      final frame = img.copyCrop(videoImage, x: 0, y: i, width: videoImage.width, height: 30);
 
       // Pré-processar o frame
       final resizedFrame = img.copyResize(frame, width: 224, height: 224);
@@ -133,12 +133,24 @@ class MyHomePageState extends State<MyHomePage> {
     for (var i = 0; i < inputSize; i++) {
       for (var j = 0; j < inputSize; j++) {
         var pixel = image.getPixel(j, i);
-        buffer[pixelIndex++] = (img.getRed(pixel) - 127.5) / 127.5;
-        buffer[pixelIndex++] = (img.getGreen(pixel) - 127.5) / 127.5;
-        buffer[pixelIndex++] = (img.getBlue(pixel) - 127.5) / 127.5;
+        buffer[pixelIndex++] = (getRed(pixel as int) - 127.5) / 127.5;
+        buffer[pixelIndex++] = (getGreen(pixel as int) - 127.5) / 127.5;
+        buffer[pixelIndex++] = (getBlue(pixel as int) - 127.5) / 127.5;
       }
     }
     return convertedBytes.buffer.asUint8List();
+  }
+
+  int getRed(int color) {
+    return (color >> 16) & 0xFF;
+  }
+
+  int getGreen(int color) {
+    return (color >> 8) & 0xFF;
+  }
+
+  int getBlue(int color) {
+    return color & 0xFF;
   }
 
   Future<void> speakText(String text) async {
