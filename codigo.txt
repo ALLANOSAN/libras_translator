@@ -1,0 +1,131 @@
+import 'package:flutter/material.dart';
+import 'package:camera/camera.dart';
+import 'package:tflite/tflite.dart';
+import 'package:flutter_tts/flutter_tts.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final cameras = await availableCameras();
+  final firstCamera = cameras.first;
+
+  runApp(MyApp(camera: firstCamera));
+}
+
+class MyApp extends StatelessWidget {
+  final CameraDescription camera;
+
+  MyApp({required this.camera});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text('Libras Translator'),
+        ),
+        body: TranslatorScreen(camera: camera),
+      ),
+    );
+  }
+}
+
+class TranslatorScreen extends StatefulWidget {
+  final CameraDescription camera;
+
+  TranslatorScreen({required this.camera});
+
+  @override
+  _TranslatorScreenState createState() => _TranslatorScreenState();
+}
+
+class _TranslatorScreenState extends State<TranslatorScreen> {
+  late CameraController _controller;
+  late Future<void> _initializeControllerFuture;
+  FlutterTts flutterTts = FlutterTts();
+  String _result = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = CameraController(
+      widget.camera,
+      ResolutionPreset.high,
+    );
+    _initializeControllerFuture = _controller.initialize();
+    loadModel();
+  }
+
+  Future<void> loadModel() async {
+    String res = await Tflite.loadModel(
+      model: 'assets/model.tflite',
+      labels: 'assets/labels.txt',
+    );
+    print(res);
+  }
+
+  Future<void> identifySign(String imagePath) async {
+    var recognitions = await Tflite.runModelOnImage(
+      path: imagePath,
+      imageMean: 0.0,
+      imageStd: 255.0,
+      numResults: 1,
+      threshold: 0.5,
+    );
+
+    if (recognitions.isNotEmpty) {
+      setState(() {
+        _result = recognitions[0]['label'];
+      });
+      await speak(_result);
+    }
+  }
+
+  Future<void> speak(String text) async {
+    await flutterTts.setLanguage('pt-BR');
+    await flutterTts.speak(text);
+  }
+
+  Future<void> captureAndIdentify() async {
+    try {
+      await _initializeControllerFuture;
+      final image = await _controller.takePicture();
+      await identifySign(image.path);
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: <Widget>[
+        Expanded(
+          child: FutureBuilder<void>(
+            future: _initializeControllerFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.done) {
+                return CameraPreview(_controller);
+              } else {
+                return Center(child: CircularProgressIndicator());
+              }
+            },
+          ),
+        ),
+        Text('Resultado: $_result'),
+        ElevatedButton(
+          onPressed: captureAndIdentify,
+          child: Text('Capturar e Identificar Sinal'),
+        ),
+      ],
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    Tflite.close();
+    super.dispose();
+  }
+}
